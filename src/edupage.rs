@@ -60,8 +60,11 @@ impl Edupage {
         
         let json_string = data.split("userhome(").nth(1).unwrap().split(");").nth(0).unwrap().replace("\t", "").replace("\n", "").replace("\r", "");
         
-        let mut f = OpenOptions::new().write(true).create(true).open("data.dump.json").unwrap();
-        f.write_all(json_string.as_bytes()).unwrap();
+        #[cfg(feature="dump")]
+        {
+            let mut f = OpenOptions::new().write(true).create(true).open("data.dump.json").unwrap();
+            f.write_all(json_string.as_bytes()).unwrap();
+        }
 
         return json_string;
     }
