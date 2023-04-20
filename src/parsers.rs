@@ -8,12 +8,9 @@ pub mod login {
             .split("userhome(")
             .nth(1)
             .unwrap()
-            .split(");")
-            .nth(0)
+            .split(");").next()
             .unwrap()
-            .replace("\t", "")
-            .replace("\n", "")
-            .replace("\r", "");
+            .replace(['\t', '\n', '\r'], "");
     
         #[cfg(feature = "dump")]
         {
@@ -26,7 +23,7 @@ pub mod login {
             f.write_all(json_string.as_bytes()).unwrap();
         }
     
-        return serde_json::from_str(&json_string).unwrap();
+        serde_json::from_str(&json_string).unwrap()
     }
     
 
@@ -68,9 +65,9 @@ pub mod short {
     pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<String>, D::Error> where D: Deserializer<'de> {
 
         let s: String = String::deserialize(deserializer)?.to_lowercase();
-        if s == "" {
-            return Ok(None);
-        } else {return Ok(Some(s))}
+        if s.is_empty() {
+            Ok(None)
+        } else {Ok(Some(s))}
     }
 }
 
@@ -102,8 +99,8 @@ pub mod option_i64_id {
         }
 
         match s.parse() {
-            Ok(i) => return Ok(Some(i)),
-            Err(_) => return Ok(None),
+            Ok(i) => Ok(Some(i)),
+            Err(_) => Ok(None),
         }
 
     }

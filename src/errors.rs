@@ -13,7 +13,7 @@ pub enum EdupageError {
 
 impl From<reqwest::Error> for EdupageError {
     fn from(value: reqwest::Error) -> Self {
-        return Self::RequestError(value);
+        Self::RequestError(value)
     }
 }
 

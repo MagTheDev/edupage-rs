@@ -1,4 +1,4 @@
-use crate::{errors::EdupageError, parsers};
+use crate::{errors::EdupageError};
 
 
 
@@ -7,7 +7,7 @@ use crate::{errors::EdupageError, parsers};
 pub struct Edupage {
 
     client: reqwest::Client,
-    isLoggedIn: bool,
+    is_logged_in: bool,
     username: Option<String>,
     password: Option<String>,
     gsec_hash: Option<String>,
@@ -22,7 +22,7 @@ impl Edupage {
     pub fn new() -> Edupage {
         Edupage {
             client: reqwest::Client::builder().cookie_store(true).build().unwrap(),
-            isLoggedIn: false,
+            is_logged_in: false,
             username: None,
             password: None,
             gsec_hash: None,
@@ -53,7 +53,7 @@ impl Edupage {
         let csrf_response = self.client.get(request_url).send().await?.text().await?;
 
         // The unwraps here are safe because the response is always the same
-        let csrf_token = csrf_response.split("name=\"csrfauth\"").nth(1).unwrap().split("\"").next().unwrap();
+        let csrf_token = csrf_response.split("name=\"csrfauth\"").nth(1).unwrap().split('\"').next().unwrap();
 
         let body = format!("csrfauth={csrf_token}&username={username}&password={password}");
     
@@ -66,9 +66,14 @@ impl Edupage {
             return Err(EdupageError::LoginError);
         }
 
+        // Authentication Successful
         let body = login_response.text().await.unwrap();
-        let parsed_body = parsers::login::get_json(body);
         
+        self._raw_data = Some(body);
+        self.password = Some(password);
+        self.username = Some(username);
+        self.subdomain = Some(subdomain);
+        self.is_logged_in = true;
 
         Ok("test".to_string())
     }
