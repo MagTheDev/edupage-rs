@@ -1,5 +1,4 @@
-
-use std::{fs::OpenOptions, io::Write};
+use crate::{errors::EdupageError, parsers};
 
 
 
@@ -13,20 +12,10 @@ pub struct Edupage {
     password: Option<String>,
     gsec_hash: Option<String>,
     subdomain: Option<String>,
+    _raw_data: Option<String>
 
 }
-// TODO: Move these to separate module
-#[derive(Debug)]
-pub enum EdupageError {
-    LoginError,
-    RequestError(reqwest::Error)
-}
 
-impl From<reqwest::Error> for EdupageError {
-    fn from(value: reqwest::Error) -> Self {
-        return Self::RequestError(value);
-    }
-}
 
 impl Edupage {
 
@@ -38,6 +27,7 @@ impl Edupage {
             password: None,
             gsec_hash: None,
             subdomain: None,
+            _raw_data: None
         }
     }
 
@@ -56,20 +46,7 @@ impl Edupage {
         self
     }
 
-    fn parse_login_data(self, data: String) -> String {
-        
-        let json_string = data.split("userhome(").nth(1).unwrap().split(");").nth(0).unwrap().replace("\t", "").replace("\n", "").replace("\r", "");
-        
-        #[cfg(feature="dump")]
-        {
-            let mut f = OpenOptions::new().write(true).create(true).open("data.dump.json").unwrap();
-            f.write_all(json_string.as_bytes()).unwrap();
-        }
-
-        return json_string;
-    }
-
-    pub async fn login<'a>(mut self, subdomain: String, username: String, password: String) -> Result<String, EdupageError> {
+    pub async fn login<'a>(&mut self, subdomain: String, username: String, password: String) -> Result<String, EdupageError> {
 
 
         let request_url: String = format!("https://{subdomain}.edupage.org/login/index.php");
@@ -90,8 +67,7 @@ impl Edupage {
         }
 
         let body = login_response.text().await.unwrap();
-
-        self.parse_login_data(body);
+        let parsed_body = parsers::login::get_json(body);
         
 
         Ok("test".to_string())
