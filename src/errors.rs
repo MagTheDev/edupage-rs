@@ -1,7 +1,4 @@
-
 use derive_more::Display;
-
-
 
 #[derive(Debug, Display)]
 pub enum EdupageError {
@@ -18,6 +15,5 @@ impl From<reqwest::Error> for EdupageError {
 }
 
 pub enum DeserializeError {
-    UnknownType(String)
+    UnknownType(String),
 }
-

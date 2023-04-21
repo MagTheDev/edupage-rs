@@ -1,11 +1,11 @@
-use serde::{Serialize, Deserialize};
 use crate::parsers::*;
+use serde::{Deserialize, Serialize};
 
 /// A struct representing a single teacher  
-/// 
+///
 /// ```rust
 /// // Sample Data:
-/// "59276": { 
+/// "59276": {
 ///      "id": "59276",
 ///      "firstname": "First",
 ///      "lastname": "Second",
@@ -21,7 +21,6 @@ use crate::parsers::*;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Teacher {
-
     #[serde(with = "option_i64_id")]
     pub id: Option<i64>,
 
@@ -49,13 +48,12 @@ pub struct Teacher {
     pub cb_hidden: i32,
 
     #[serde(rename = "isOut")]
-    pub is_out: bool
-
+    pub is_out: bool,
 }
 
 #[derive(Debug)]
 pub enum Gender {
     Male,
     Female,
-    Unknown
+    Unknown,
 }

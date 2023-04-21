@@ -1,33 +1,27 @@
-use crate::{errors::EdupageError};
-
-
-
+use crate::errors::EdupageError;
 
 #[derive(Debug)]
 pub struct Edupage {
-
     client: reqwest::Client,
     is_logged_in: bool,
     username: Option<String>,
     password: Option<String>,
-    gsec_hash: Option<String>,
     subdomain: Option<String>,
-    _raw_data: Option<String>
-
+    _raw_data: Option<String>,
 }
 
-
 impl Edupage {
-
     pub fn new() -> Edupage {
         Edupage {
-            client: reqwest::Client::builder().cookie_store(true).build().unwrap(),
+            client: reqwest::Client::builder()
+                .cookie_store(true)
+                .build()
+                .unwrap(),
             is_logged_in: false,
             username: None,
             password: None,
-            gsec_hash: None,
             subdomain: None,
-            _raw_data: None
+            _raw_data: None,
         }
     }
 
@@ -46,21 +40,35 @@ impl Edupage {
         self
     }
 
-    pub async fn login<'a>(&mut self, subdomain: String, username: String, password: String) -> Result<String, EdupageError> {
-
-
+    pub async fn login<'a>(
+        &mut self,
+        subdomain: String,
+        username: String,
+        password: String,
+    ) -> Result<(), EdupageError> {
         let request_url: String = format!("https://{subdomain}.edupage.org/login/index.php");
         let csrf_response = self.client.get(request_url).send().await?.text().await?;
 
         // The unwraps here are safe because the response is always the same
-        let csrf_token = csrf_response.split("name=\"csrfauth\"").nth(1).unwrap().split('\"').next().unwrap();
+        let csrf_token = csrf_response
+            .split("name=\"csrfauth\"")
+            .nth(1)
+            .unwrap()
+            .split('\"')
+            .next()
+            .unwrap();
 
         let body = format!("csrfauth={csrf_token}&username={username}&password={password}");
-    
-        let request_url = format!("https://{subdomain}.edupage.org/login/edubarLogin.php");
-        let login_response = self.client.post(request_url).body(body).header("Content-Type", "application/x-www-form-urlencoded").send().await.unwrap();
 
-        println!("Response: {:#?}", login_response);
+        let request_url = format!("https://{subdomain}.edupage.org/login/edubarLogin.php");
+        let login_response = self
+            .client
+            .post(request_url)
+            .body(body)
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .send()
+            .await
+            .unwrap();
 
         if login_response.url().as_str().contains("bad=1") {
             return Err(EdupageError::LoginError);
@@ -68,17 +76,13 @@ impl Edupage {
 
         // Authentication Successful
         let body = login_response.text().await.unwrap();
-        
-        self._raw_data = Some(body);
+
+        self._raw_data = Some(body.clone());
         self.password = Some(password);
         self.username = Some(username);
         self.subdomain = Some(subdomain);
         self.is_logged_in = true;
 
-        Ok("test".to_string())
+        Ok(())
     }
-
-    
-
-
 }

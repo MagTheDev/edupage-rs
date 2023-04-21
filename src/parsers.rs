@@ -1,5 +1,3 @@
-
-
 pub mod login {
     use serde_json::Value;
 
@@ -8,10 +6,11 @@ pub mod login {
             .split("userhome(")
             .nth(1)
             .unwrap()
-            .split(");").next()
+            .split(");")
+            .next()
             .unwrap()
             .replace(['\t', '\n', '\r'], "");
-    
+
         #[cfg(feature = "dump")]
         {
             use std::{fs::OpenOptions, io::Write};
@@ -22,87 +21,92 @@ pub mod login {
                 .unwrap();
             f.write_all(json_string.as_bytes()).unwrap();
         }
-    
+
         serde_json::from_str(&json_string).unwrap()
     }
-    
-
 }
-
 
 pub mod gender {
 
-    use serde::{Serializer, Deserializer, Deserialize};
     use crate::models::Gender;
+    use serde::{Deserialize, Deserializer, Serializer};
 
-    pub fn serialize<S>(gender: &Gender, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
-
+    pub fn serialize<S>(gender: &Gender, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         serializer.serialize_str(match gender {
             Gender::Male => "M",
             Gender::Female => "F",
-            Gender::Unknown => ""
+            Gender::Unknown => "",
         })
-
     }
 
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<Gender, D::Error> where D: Deserializer<'de> {
-
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Gender, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         let s: &str = &String::deserialize(deserializer)?.to_lowercase();
         match s {
             "m" => Ok(Gender::Male),
             "f" => Ok(Gender::Female),
             "" => Ok(Gender::Unknown),
-            _ => Err(serde::de::Error::custom(format!("Failed deserializing gender: {}", s)))
+            _ => Err(serde::de::Error::custom(format!(
+                "Failed deserializing gender: {}",
+                s
+            ))),
         }
-
     }
-
 }
 
 pub mod short {
-    use serde::{Deserializer, Deserialize};
+    use serde::{Deserialize, Deserializer};
 
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<String>, D::Error> where D: Deserializer<'de> {
-
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         let s: String = String::deserialize(deserializer)?.to_lowercase();
         if s.is_empty() {
             Ok(None)
-        } else {Ok(Some(s))}
+        } else {
+            Ok(Some(s))
+        }
     }
 }
 
 pub mod option_i64_id {
-    use serde::{Deserializer, Deserialize, Serializer};
+    use serde::{Deserialize, Deserializer, Serializer};
 
-
-    pub fn serialize<S>(id: &Option<i64>, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
-
+    pub fn serialize<S>(id: &Option<i64>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         if id.is_none() {
             serializer.serialize_none()
         } else {
             serializer.serialize_i64(id.unwrap())
         }
-
     }
 
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<i64>, D::Error> where D: Deserializer<'de> {
-
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<i64>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         let s: Option<String> = Deserialize::deserialize(deserializer)?;
 
         if s.is_none() {
             return Ok(None);
-        } 
+        }
 
         let s = &s.unwrap();
         if s.is_empty() {
-            return Ok(None)
+            return Ok(None);
         }
 
         match s.parse() {
             Ok(i) => Ok(Some(i)),
             Err(_) => Ok(None),
         }
-
     }
-
 }
