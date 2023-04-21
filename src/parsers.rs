@@ -75,7 +75,7 @@ pub mod short {
     }
 }
 
-pub mod option_i64_id {
+pub mod option_string_i64 {
     use serde::{Deserialize, Deserializer, Serializer};
 
     pub fn serialize<S>(id: &Option<i64>, serializer: S) -> Result<S::Ok, S::Error>
@@ -109,4 +109,29 @@ pub mod option_i64_id {
             Err(_) => Ok(None),
         }
     }
+}
+
+pub mod string_i64 {
+
+    use serde::{Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S>(id: &i64, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_i64(id.to_owned())
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<i64, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s: String= Deserialize::deserialize(deserializer)?;
+
+        match s.parse() {
+            Ok(i) => Ok(i),
+            Err(_) => unreachable!("This code should be unreachable as id should never be non numerical"),
+        }
+    }
+
 }
