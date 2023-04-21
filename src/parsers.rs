@@ -126,12 +126,13 @@ pub mod string_i64 {
     where
         D: Deserializer<'de>,
     {
-        let s: String= Deserialize::deserialize(deserializer)?;
+        let s: String = Deserialize::deserialize(deserializer)?;
 
         match s.parse() {
             Ok(i) => Ok(i),
-            Err(_) => unreachable!("This code should be unreachable as id should never be non numerical"),
+            Err(_) => {
+                unreachable!("This code should be unreachable as id should never be non numerical")
+            }
         }
     }
-
 }

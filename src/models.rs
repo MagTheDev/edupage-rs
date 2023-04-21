@@ -98,7 +98,7 @@ pub struct Student {
     #[serde(rename = "numberinclass", with = "option_string_i64")]
     pub number_in_class: Option<i64>,
     #[serde(rename = "isOut")]
-    pub is_out: bool
+    pub is_out: bool,
 }
 
 #[derive(Debug, Clone)]
