@@ -2,12 +2,12 @@ use crate::errors::EdupageError;
 
 #[derive(Debug)]
 pub struct Edupage {
-    client: reqwest::Client,
-    is_logged_in: bool,
-    username: Option<String>,
-    password: Option<String>,
-    subdomain: Option<String>,
-    _raw_data: Option<String>,
+    pub client: reqwest::Client,
+    pub is_logged_in: bool,
+    pub username: Option<String>,
+    pub password: Option<String>,
+    pub subdomain: Option<String>,
+    pub _raw_data: Option<String>,
 }
 
 impl Edupage {
