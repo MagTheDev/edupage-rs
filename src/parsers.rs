@@ -1,3 +1,5 @@
+use crate::models::Gender;
+
 pub mod login {
     use serde_json::Value;
 
@@ -29,7 +31,7 @@ pub mod login {
 pub mod gender {
 
     use crate::models::Gender;
-    use serde::{Deserialize, Deserializer, Serializer};
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
     pub fn serialize<S>(gender: &Gender, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -55,6 +57,37 @@ pub mod gender {
                 "Failed deserializing gender: {}",
                 s
             ))),
+        }
+    }
+
+    impl Serialize for Gender {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_str(match self {
+                Gender::Male => "M",
+                Gender::Female => "F",
+                Gender::Unknown => "",
+            })
+        }
+    }
+
+    impl<'de> Deserialize<'de> for Gender {
+        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            let s: &str = &String::deserialize(deserializer)?.to_lowercase();
+            match s {
+                "m" => Ok(Gender::Male),
+                "f" => Ok(Gender::Female),
+                "" => Ok(Gender::Unknown),
+                _ => Err(serde::de::Error::custom(format!(
+                    "Failed deserializing gender: '{}'",
+                    s
+                ))),
+            }
         }
     }
 }
