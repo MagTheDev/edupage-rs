@@ -1,4 +1,5 @@
 use crate::parsers::*;
+use num_enum::{IntoPrimitive, TryFromPrimitive};
 use serde::{Deserialize, Serialize};
 
 /// A struct representing a single teacher  
@@ -23,30 +24,20 @@ use serde::{Deserialize, Serialize};
 pub struct Teacher {
     #[serde(with = "option_string_i64")]
     pub id: Option<i64>,
-
     #[serde(rename = "firstname")]
     pub first_name: String,
-
     #[serde(rename = "lastname")]
     pub last_name: String,
-
     #[serde(deserialize_with = "crate::parsers::short::deserialize")]
     pub short: Option<String>,
-
-    #[serde(with = "gender")]
     pub gender: Gender,
-
     #[serde(rename = "classroomid")]
     pub classroom_id: String,
-
     #[serde(rename = "datefrom")]
     pub date_from: String,
-
     #[serde(rename = "dateto")]
     pub date_to: String,
-
     pub cb_hidden: i32,
-
     #[serde(rename = "isOut")]
     pub is_out: bool,
 }
@@ -89,7 +80,6 @@ pub struct Student {
     pub second_parent_id: Option<i64>,
     #[serde(rename = "parent3id", with = "option_string_i64")]
     pub third_parent_id: Option<i64>, // ??
-    #[serde(with = "gender")]
     pub gender: Gender,
     #[serde(rename = "datefrom")]
     pub date_from: Option<String>,
@@ -100,6 +90,42 @@ pub struct Student {
     #[serde(rename = "isOut")]
     pub is_out: bool,
 }
+/// A struct representing a parent.
+/// ```text
+/// // Sample Data:
+///    "-1429": {
+///        "id": "-1429",
+///        "firstname": "Roman",
+///        "lastname": "Tulek",
+///        "gender": "M"
+///   }
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Parent {
+    #[serde(with = "string_i64")]
+    pub id: i64,
+    #[serde(rename = "firstname")]
+    pub first_name: String,
+    #[serde(rename = "lastname")]
+    pub last_name: String,
+    pub gender: Gender
+
+}
+#[derive(Debug, Clone, Copy)]
+pub enum Id {
+    Teacher(i64),
+    Student(i64),
+    Parent(i64),
+    Class(i64),
+    Plan(i64),
+    CustomPlan(i64),
+    StudentClass(i64),
+    StudentPlan(i64),
+    OnlyStudent(i64),
+    AllStudents,
+    OnlyAllStudents,
+    AllTeachers,
+    Everyone,
+}
 
 #[derive(Debug, Clone)]
 pub enum Gender {
@@ -107,3 +133,33 @@ pub enum Gender {
     Female,
     Unknown,
 }
+
+#[derive(
+    Serialize, Deserialize, Debug, IntoPrimitive, TryFromPrimitive, PartialEq, Clone, Copy,
+)]
+#[repr(usize)]
+pub enum TimelineItemType {
+    News = 0,
+    Message = 1,
+    HDailyPlan = 2,
+    StudentAbset = 3,
+    Confirmation = 4,
+    HClearPlans = 5,
+    HFinances = 6,
+    HLunchMenu = 7,
+    HClearISICData = 8,
+    Substitution = 9,
+    HClearCache = 10,
+    Event = 11,
+    HHomework = 12,
+    Grade = 13,
+    HSubstitution = 14,
+    HGrades = 15,
+    Homework = 16,
+    HClearDBI = 17,
+    Unknown = 18,
+    TestAssignment = 19,
+}
+
+
+
